@@ -1,6 +1,6 @@
 
 import 'package:easyshare/views/receive_file.dart';
-import 'package:easyshare/views/send_file.dart';
+import 'package:easyshare/views/select_file.dart';
 import 'package:flutter/material.dart';
 
 class Homepage extends StatefulWidget {
@@ -31,7 +31,7 @@ class _HomepageState extends State<Homepage> {
                 borderRadius: BorderRadius.circular(12),
                 onTap: () {
 
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context)=> SendFile()));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context)=> SelectFile()));
                 },
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
