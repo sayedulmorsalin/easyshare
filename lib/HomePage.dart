@@ -1,6 +1,6 @@
 
-import 'package:easyshare/views/image_receiver.dart';
-import 'package:easyshare/views/image_sender.dart';
+import 'package:easyshare/views/receive_file.dart';
+import 'package:easyshare/views/send_file.dart';
 import 'package:flutter/material.dart';
 
 class Homepage extends StatefulWidget {
@@ -31,15 +31,15 @@ class _HomepageState extends State<Homepage> {
                 borderRadius: BorderRadius.circular(12),
                 onTap: () {
 
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context)=> ImageSender()));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context)=> SendFile()));
                 },
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       Icons.send,
-                      size: 48,
-                      color: Colors.blue,
+                      size: 78,
+                      color: Colors.lightBlueAccent,
                     ),
                     SizedBox(height: 6),
                     Text(
@@ -57,15 +57,15 @@ class _HomepageState extends State<Homepage> {
                 borderRadius: BorderRadius.circular(12),
                 onTap: () {
 
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => ImageReceiver()));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => ReceiveFile()));
                 },
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       Icons.get_app,
-                      size: 48,
-                      color: Colors.blue,
+                      size: 78,
+                      color: Colors.lightBlueAccent,
                     ),
                     SizedBox(height: 6),
                     Text(
