@@ -1,4 +1,8 @@
+import 'package:easyshare/controllers/selection_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
@@ -10,8 +14,11 @@ class SelectFile extends StatefulWidget {
 }
 
 class _SelectFileState extends State<SelectFile> {
+  final SelectionController selectionController = Get.put(
+    SelectionController(),
+  );
+
   List<AssetEntity> images = [];
-  Set<AssetEntity> selectedImages = {};
 
   bool isLoading = true;
   bool isFetchingMore = false;
@@ -23,8 +30,7 @@ class _SelectFileState extends State<SelectFile> {
   late AssetPathEntity imageAlbum;
 
   Future<void> initGallery() async {
-    final PermissionState ps =
-    await PhotoManager.requestPermissionExtend();
+    final PermissionState ps = await PhotoManager.requestPermissionExtend();
 
     if (!ps.isAuth) {
       setState(() => isLoading = false);
@@ -32,12 +38,7 @@ class _SelectFileState extends State<SelectFile> {
     }
 
     final filterOption = FilterOptionGroup(
-      orders: const [
-        OrderOption(
-          type: OrderOptionType.createDate,
-          asc: false, // NEW → OLD
-        ),
-      ],
+      orders: const [OrderOption(type: OrderOptionType.createDate, asc: false)],
     );
 
     final albums = await PhotoManager.getAssetPathList(
@@ -56,8 +57,7 @@ class _SelectFileState extends State<SelectFile> {
 
     isFetchingMore = true;
 
-    final List<AssetEntity> newImages =
-    await imageAlbum.getAssetListPaged(
+    final List<AssetEntity> newImages = await imageAlbum.getAssetListPaged(
       page: currentPage,
       size: pageSize,
     );
@@ -81,16 +81,14 @@ class _SelectFileState extends State<SelectFile> {
 
   @override
   Widget build(BuildContext context) {
+    print("rebuild");
     return DefaultTabController(
       length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: const Text(
-            "Send files",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+            "Select files",
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
           ),
           backgroundColor: Colors.lightBlueAccent,
           bottom: const TabBar(
@@ -107,84 +105,79 @@ class _SelectFileState extends State<SelectFile> {
         ),
         body: TabBarView(
           children: [
-            // IMAGE TAB
-            isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : NotificationListener<ScrollNotification>(
-              onNotification: (scroll) {
-                if (scroll.metrics.pixels >=
-                    scroll.metrics.maxScrollExtent - 300) {
-                  loadMoreImages();
-                }
-                return false;
-              },
-              child: GridView.builder(
-                padding: const EdgeInsets.all(2),
-                itemCount:
-                hasMore ? images.length + 1 : images.length,
-                gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 2,
-                  mainAxisSpacing: 2,
-                ),
-                itemBuilder: (context, index) {
-                  if (index == images.length) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
+            if (isLoading)
+              const Center(child: CircularProgressIndicator())
+            else
+              NotificationListener<ScrollNotification>(
+                onNotification: (scroll) {
+                  if (scroll.metrics.pixels >=
+                      scroll.metrics.maxScrollExtent - 300) {
+                    loadMoreImages();
                   }
+                  return false;
+                },
+                child: GridView.builder(
+                  padding: const EdgeInsets.all(2),
+                  itemCount: hasMore ? images.length + 1 : images.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 2,
+                    mainAxisSpacing: 2,
+                  ),
+                  itemBuilder: (context, index) {
+                    if (index == images.length) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                  final asset = images[index];
-                  final selectedIndex =
-                  selectedImages.toList().indexOf(asset);
+                    final asset = images[index];
 
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedImages.contains(asset)
-                            ? selectedImages.remove(asset)
-                            : selectedImages.add(asset);
-                      });
-                    },
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        AssetEntityImage(
-                          asset,
-                          fit: BoxFit.cover,
-                          isOriginal: false,
-                        ),
+                    return Obx(() {
+                      final isSelected = selectionController.selectedImages
+                          .contains(asset);
+                      final selectedIndex = selectionController.selectedImages
+                          .toList()
+                          .indexOf(asset);
 
-                        if (selectedImages.contains(asset))
-                          Container(
-                            color:
-                            Colors.blue.withOpacity(0.4),
-                          ),
+                      return GestureDetector(
+                        onTap: () {
+                          selectionController.toggle(asset);
+                        },
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            AssetEntityImage(
+                              asset,
+                              fit: BoxFit.cover,
+                              isOriginal: false,
+                            ),
 
-                        if (selectedImages.contains(asset))
-                          Positioned(
-                            top: 6,
-                            right: 6,
-                            child: CircleAvatar(
-                              radius: 12,
-                              backgroundColor: Colors.blue,
-                              child: Text(
-                                '${selectedIndex + 1}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+                            if (isSelected)
+                              Container(color: Colors.blue.withOpacity(0.4)),
+
+                            if (isSelected)
+                              Positioned(
+                                top: 6,
+                                right: 6,
+                                child: CircleAvatar(
+                                  radius: 12,
+                                  backgroundColor: Colors.blue,
+                                  child: Text(
+                                    '${selectedIndex + 1}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  );
-                },
+                          ],
+                        ),
+                      );
+                    });
+                  },
+                ),
               ),
-            ),
 
             const Center(child: Text("Video")),
             const Center(child: Text("Apps")),
@@ -192,40 +185,66 @@ class _SelectFileState extends State<SelectFile> {
           ],
         ),
 
-        bottomNavigationBar: selectedImages.isEmpty
-            ? null
-            : Container(
-          height: 60,
-          padding:
-          const EdgeInsets.symmetric(horizontal: 16),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                blurRadius: 6,
-                color: Colors.black12,
-              )
-            ],
-          ),
-          child: Row(
-            children: [
-              Text(
-                '${selectedImages.length} selected',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: () {
-                  debugPrint(
-                      'Selected images: ${selectedImages.length}');
-                },
-                child: const Text("Send"),
-              ),
-            ],
-          ),
-        ),
+        bottomNavigationBar: Obx(() {
+          return selectionController.selectedImages.isEmpty
+              ? const SizedBox.shrink()
+              : Container(
+                  height: 60,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(blurRadius: 6, color: Colors.black12),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        '${selectionController.selectedImages.length} selected',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const Spacer(),
+                      ElevatedButton(
+                        onPressed: () {
+                          selectionController.clear();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueGrey,
+                          minimumSize: const Size(70, 48),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text("Unselect all", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),),
+                      ),
+                      const Spacer(),
+                      ElevatedButton(
+                        onPressed: () {
+                          debugPrint(
+                            'Selected images: ${selectionController.selectedImages.length}',
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          minimumSize: const Size(120, 48),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text("Send", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),),
+                      ),
+                    ],
+                  ),
+                );
+        }),
       ),
     );
   }
