@@ -1,4 +1,5 @@
 import 'package:easyshare/controllers/selection_controller.dart';
+import 'package:easyshare/views/send_file.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
@@ -81,7 +82,7 @@ class _SelectFileState extends State<SelectFile> {
 
   @override
   Widget build(BuildContext context) {
-    print("rebuild");
+
     return DefaultTabController(
       length: 4,
       child: Scaffold(
@@ -219,13 +220,21 @@ class _SelectFileState extends State<SelectFile> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text("Unselect all", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),),
+                        child: const Text(
+                          "Unselect all",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                       const Spacer(),
                       ElevatedButton(
                         onPressed: () {
-                          debugPrint(
-                            'Selected images: ${selectionController.selectedImages.length}',
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => SendFile(),
+                            ),
                           );
                         },
                         style: ElevatedButton.styleFrom(
@@ -239,7 +248,13 @@ class _SelectFileState extends State<SelectFile> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text("Send", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),),
+                        child: const Text(
+                          "Send",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ],
                   ),
