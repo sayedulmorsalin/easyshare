@@ -9,7 +9,7 @@
 
 
     <application
-        android:label="easyshare"
+        android:label="EasyShare"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true">

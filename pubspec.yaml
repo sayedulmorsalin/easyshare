@@ -44,6 +44,7 @@ dependencies:
   network_info_plus: ^7.0.0
   photo_manager: ^3.8.3
   photo_manager_image_provider: ^2.2.0
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -60,6 +61,12 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/easyshare.png"
+  remove_alpha_ios: true
+
 flutter:
 
   # The following line ensures that the Material Icons font is
